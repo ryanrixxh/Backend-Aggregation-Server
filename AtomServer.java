@@ -1,7 +1,7 @@
 import java.net.*;
 import java.io.*;
 
-public class AtomServer {
+public class AtomServer extends Thread {
 
   public static void main(String[] args) {
     ServerSocket server = null;
