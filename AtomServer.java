@@ -18,7 +18,7 @@ public class AtomServer extends Thread {
         Socket c_server = server.accept();
 
         //Send confirmation to ContentServer
-        System.out.println("New ContentServer connected" + c_server.getInetAddress().getHostAddres());
+        System.out.println("New ContentServer connected" + c_server.getInetAddress().getHostAddress());
 
         //Create new thread
         ContentHandler c_handler = new ContentHandler(c_server);
@@ -45,7 +45,7 @@ public class AtomServer extends Thread {
   private static class ContentHandler implements Runnable {
     private final Socket c_serverSocket;
 
-    public ClientHandler(Socket socket) {
+    public ContentHandler(Socket socket) {
       this.c_serverSocket = socket;
     }
 
@@ -87,4 +87,6 @@ public class AtomServer extends Thread {
       }
     }
   }
+
+
 }
