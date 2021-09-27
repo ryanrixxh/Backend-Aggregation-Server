@@ -1,7 +1,10 @@
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 public class AtomServer extends Thread {
+
+  public static Queue<String> feed = new LinkedList<>();
 
   public static void main(String[] args) {
     ServerSocket server = null;
@@ -65,6 +68,7 @@ public class AtomServer extends Thread {
         while ((line = in.readLine()) != null) {
           //Show recieved ContentServer message
           System.out.printf("From ContentServer: %s\n", line);
+          feed.add(line);
           out.println(line);
         }
       }
