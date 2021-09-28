@@ -15,7 +15,7 @@ class Client {
       Scanner sc = new Scanner(System.in);
       String line = null;
 
-      out.println("client");
+      out.println("Client");
 
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user

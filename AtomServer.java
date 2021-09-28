@@ -18,15 +18,26 @@ public class AtomServer extends Thread {
       //Loop for recieving ContentServer requests
       while (true) {
         //Socket recieving requests
-        Socket c_server = server.accept();
+        Socket socket = server.accept();
 
-        //Send confirmation to ContentServer
-        System.out.println("New ContentServer connected" + c_server.getInetAddress().getHostAddress());
+        //Print connection confirmation
+        System.out.println("New Connection: " + socket.getInetAddress().getHostAddress() + socket.getInetAddress().getHostName());
+
+        BufferedReader type_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String type = type_in.readLine();
 
         //Create new thread
-        ContentHandler c_handler = new ContentHandler(c_server);
+        if(type.equals("ContentServer")) {
+          System.out.println("type is server");
+          ContentHandler s_handler = new ContentHandler(socket);
+          new Thread(s_handler).start();
+        }
+        else if (type.equals("Client")) {
+          System.out.println("type is client");
+          ClientHandler c_handler = new ClientHandler(socket);
+          new Thread(c_handler).start();
+        }
 
-        new Thread(c_handler).start();
       }
     }
     catch (IOException e) {
@@ -35,7 +46,7 @@ public class AtomServer extends Thread {
     finally {
       if (server != null) {
         try {
-          
+
           //Prints out the final feed
           for(String str:feed) {
             System.out.println(str);
@@ -62,7 +73,7 @@ public class AtomServer extends Thread {
       BufferedReader in = null;
 
       try {
-
+        System.out.println("Starting ContentHandler Thread ...");
         //Get the output of ContentServer
         out = new PrintWriter(c_serverSocket.getOutputStream(), true);
 
@@ -97,5 +108,52 @@ public class AtomServer extends Thread {
     }
   }
 
+  //ClientHandler
+  private static class ClientHandler implements Runnable {
+    private final Socket client_socket;
+
+    public ClientHandler(Socket socket) {
+      this.client_socket = socket;
+    }
+
+    public void run() {
+      PrintWriter out = null;
+      BufferedReader in = null;
+
+      try {
+        System.out.println("Starting Client Thread ...");
+        //Get the output of ContentServer
+        out = new PrintWriter(client_socket.getOutputStream(), true);
+
+        //Get input stream of ContentServer
+        in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
+
+        String line;
+        while ((line = in.readLine()) != null) {
+          //Show recieved ContentServer message
+          System.out.printf("From Client: %s\n", line);
+          feed.add(line);
+          out.println(line);
+        }
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+      }
+      finally {
+        try {
+          if (out != null) {
+            out.close();
+          }
+          if (in != null) {
+            in.close();
+            client_socket.close();
+          }
+        }
+        catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
 
 }
