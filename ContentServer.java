@@ -15,6 +15,8 @@ class ContentServer {
       Scanner sc = new Scanner(System.in);
       String line = null;
 
+      out.println("contentServer");
+      
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
         line = sc.nextLine();

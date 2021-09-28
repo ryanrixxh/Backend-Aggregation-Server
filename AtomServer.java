@@ -35,6 +35,11 @@ public class AtomServer extends Thread {
     finally {
       if (server != null) {
         try {
+          
+          //Prints out the final feed
+          for(String str:feed) {
+            System.out.println(str);
+          }
           server.close();
         }
         catch (IOException e) {
