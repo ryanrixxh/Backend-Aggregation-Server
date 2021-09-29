@@ -12,8 +12,10 @@ public class AtomServer extends Thread {
     try {
 
       //Server listens to ServerSocket port
-      server = new ServerSocket(1234);
+      server = new ServerSocket(4567);
       server.setReuseAddress(true);
+
+      //Print Status
 
       //Loop for recieving ContentServer requests
       while (true) {
@@ -46,11 +48,11 @@ public class AtomServer extends Thread {
     finally {
       if (server != null) {
         try {
-
           //Prints out the final feed
           for(String str:feed) {
             System.out.println(str);
           }
+
           server.close();
         }
         catch (IOException e) {
@@ -130,9 +132,7 @@ public class AtomServer extends Thread {
 
         String line;
         while ((line = in.readLine()) != null) {
-          //Show recieved ContentServer message
           System.out.printf("From Client: %s\n", line);
-          feed.add(line);
           out.println(line);
         }
       }

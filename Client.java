@@ -4,7 +4,7 @@ import java.util.*;
 
 class Client {
   public static void main(String[] args) {
-    try (Socket socket = new Socket("localhost", 1234)) {
+    try (Socket socket = new Socket("localhost", 4567)) {
 
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
