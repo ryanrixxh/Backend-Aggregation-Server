@@ -124,11 +124,16 @@ public class AtomServer extends Thread {
     public void run() {
       PrintWriter out = null;
       BufferedReader in = null;
+      ObjectOutputStream obj = null;
 
       try {
         System.out.println("Starting Client Thread ...");
         //Get the output of ContentServer
         out = new PrintWriter(client_socket.getOutputStream(), true);
+
+        //Create an object stream to send the feed (or some other object in future)
+        obj = new ObjectOutputStream(client_socket.getOutputStream());
+        obj.writeObject(feed);
 
         //Get input stream of ContentServer
         in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));

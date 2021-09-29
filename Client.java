@@ -18,6 +18,11 @@ class Client {
       out.println("Client");
       System.out.println(in.readLine());
 
+      ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
+      Queue<String> currentFeed = (Queue<String>) inObj.readObject();
+
+      System.out.println(currentFeed);
+
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
         line = sc.nextLine();
@@ -33,6 +38,9 @@ class Client {
       sc.close();
     }
     catch (IOException e) {
+      e.printStackTrace();
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
   }
