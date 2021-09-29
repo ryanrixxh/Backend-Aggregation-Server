@@ -16,6 +16,7 @@ class Client {
       String line = null;
 
       out.println("Client");
+      System.out.println(in.readLine());
 
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
