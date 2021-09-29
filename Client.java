@@ -5,7 +5,12 @@ import java.util.*;
 
 class Client {
   public static void main(String[] args) {
-    try (Socket socket = new Socket("localhost", 4567)) {
+
+    Scanner input = new Scanner(System.in);
+    String servername = input.nextLine();
+    int port = Integer.parseInt(input.nextLine());
+
+    try (Socket socket = new Socket(servername, port)) {
 
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
