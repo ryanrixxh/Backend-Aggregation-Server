@@ -15,8 +15,6 @@ public class AtomServer extends Thread {
       server = new ServerSocket(4567);
       server.setReuseAddress(true);
 
-      //Print Status
-
       //Loop for recieving ContentServer requests
       while (true) {
         //Socket recieving requests
@@ -26,9 +24,13 @@ public class AtomServer extends Thread {
         System.out.println("New Connection: " + socket.getInetAddress().getHostAddress() + socket.getInetAddress().getHostName());
 
         BufferedReader type_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        PrintWriter init = new PrintWriter(socket.getOutputStream(), true);
         String type = type_in.readLine();
 
-        //Create new thread
+        //Send initial successful connection response
+        init.println("201 - HTTP CREATED");
+
+        //Create new thread.
         if(type.equals("ContentServer")) {
           System.out.println("type is server");
           ContentHandler s_handler = new ContentHandler(socket);
@@ -76,7 +78,8 @@ public class AtomServer extends Thread {
 
       try {
         System.out.println("Starting ContentHandler Thread ...");
-        //Get the output of ContentServer
+
+
         out = new PrintWriter(c_serverSocket.getOutputStream(), true);
 
         //Get input stream of ContentServer
@@ -87,7 +90,7 @@ public class AtomServer extends Thread {
           //Show recieved ContentServer message
           System.out.printf("From ContentServer: %s\n", line);
           feed.add(line);
-          out.println(line);
+          out.println("200 - Success");
         }
       }
       catch (IOException e) {

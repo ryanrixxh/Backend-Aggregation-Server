@@ -16,6 +16,7 @@ class ContentServer {
       String line = null;
 
       out.println("ContentServer");
+      System.out.println(in.readLine());
 
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
