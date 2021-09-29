@@ -6,15 +6,16 @@ import java.util.*;
 class Client {
   public static void main(String[] args) {
 
+    //Client input handling
     Scanner input = new Scanner(System.in);
     String str = input.nextLine();
     String[] split = str.split(":");
+    String servername = split[1];
+    String cutName = servername.replace("/", "");
+    int port = Integer.parseInt(split[2]);
 
-
-    String servername = split[0];
-    int port = Integer.parseInt(split[1]);
-
-    try (Socket socket = new Socket(servername, port)) {
+    //Socket Connection using input
+    try (Socket socket = new Socket(cutName, port)) {
 
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
