@@ -7,8 +7,12 @@ class Client {
   public static void main(String[] args) {
 
     Scanner input = new Scanner(System.in);
-    String servername = input.nextLine();
-    int port = Integer.parseInt(input.nextLine());
+    String str = input.nextLine();
+    String[] split = str.split(":");
+
+
+    String servername = split[0];
+    int port = Integer.parseInt(split[1]);
 
     try (Socket socket = new Socket(servername, port)) {
 
