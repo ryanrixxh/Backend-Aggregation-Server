@@ -29,6 +29,7 @@ public class AtomServer extends Thread {
 
         //Send initial successful connection response
         init.println("201 - HTTP CREATED");
+        init.flush();
 
         //Create new thread.
         if(type.equals("ContentServer")) {

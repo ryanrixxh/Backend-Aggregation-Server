@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+
 class Client {
   public static void main(String[] args) {
     try (Socket socket = new Socket("localhost", 4567)) {
@@ -19,9 +20,15 @@ class Client {
       System.out.println(in.readLine());
 
       ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
+
+      @SuppressWarnings("unchecked")
       Queue<String> currentFeed = (Queue<String>) inObj.readObject();
 
-      System.out.println(currentFeed);
+      if (currentFeed instanceof Queue) {
+        System.out.println(currentFeed);
+      } else {
+        System.out.println("Error: Object is not a feed");
+      }
 
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
