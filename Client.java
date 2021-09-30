@@ -26,7 +26,7 @@ class Client {
       Scanner sc = new Scanner(System.in);
       String line = null;
 
-      out.println("Client");
+      out.println("GET / HTTP/1.1");
       System.out.println(in.readLine());
 
       ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());

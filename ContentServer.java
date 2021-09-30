@@ -25,7 +25,7 @@ class ContentServer {
       Scanner sc = new Scanner(System.in);
       String line = null;
 
-      out.println("ContentServer");
+      out.println("POST / HTTP/1.1");
       System.out.println(in.readLine());
 
       Scanner fromFile = new Scanner(new FileReader("input1.txt"));

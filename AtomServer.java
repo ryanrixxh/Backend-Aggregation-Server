@@ -32,12 +32,12 @@ public class AtomServer extends Thread {
         init.flush();
 
         //Create new thread.
-        if(type.equals("ContentServer")) {
+        if(type.equals("POST / HTTP/1.1")) {
           System.out.println("type is server");
           ContentHandler s_handler = new ContentHandler(socket);
           new Thread(s_handler).start();
         }
-        else if (type.equals("Client")) {
+        else if (type.equals("GET / HTTP/1.1")) {
           System.out.println("type is client");
           ClientHandler c_handler = new ClientHandler(socket);
           new Thread(c_handler).start();
