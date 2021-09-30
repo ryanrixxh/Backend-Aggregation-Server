@@ -4,7 +4,17 @@ import java.util.*;
 
 class ContentServer {
   public static void main(String[] args) {
-    try (Socket socket = new Socket("localhost", 4567)) {
+
+    //ContentServer input handling
+    Scanner input = new Scanner(System.in);
+    String str = input.nextLine();
+    String[] split = str.split(":");
+    String servername = split[1];
+    String cutName = servername.replace("/", "");
+    int port = Integer.parseInt(split[2]);
+
+
+    try (Socket socket = new Socket(cutName, port)) {
 
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -17,6 +27,10 @@ class ContentServer {
 
       out.println("ContentServer");
       System.out.println(in.readLine());
+
+      Scanner fromFile = new Scanner(new FileReader("input1.txt"));
+      String toSend = fromFile.nextLine();
+      out.println(toSend);
 
       while (!"exit".equalsIgnoreCase(line)) {
         //Read from user
