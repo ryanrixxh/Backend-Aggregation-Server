@@ -32,7 +32,7 @@ public class AtomServer extends Thread {
         init.flush();
 
         //Create new thread.
-        if(type.equals("POST / HTTP/1.1")) {
+        if(type.equals("PUT / HTTP/1.1")) {
           System.out.println("type is server");
           ContentHandler s_handler = new ContentHandler(socket);
           new Thread(s_handler).start();
@@ -87,14 +87,17 @@ public class AtomServer extends Thread {
         in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
 
         String line;
-        while ((line = in.readLine()) != null) {
-          //Show recieved ContentServer message
-          System.out.printf("From ContentServer: %s\n", line);
-          feed.add(line);
-          out.println("200 - Success");
-        }
+        line = in.readLine();
+        //Show recieved ContentServer message
+        System.out.printf("From ContentServer: %s\n", line);
+        feed.add(line);
+        out.println("200 - Success");
+        
       }
       catch (IOException e) {
+        e.printStackTrace();
+      }
+      catch (InterruptedException e) {
         e.printStackTrace();
       }
       finally {

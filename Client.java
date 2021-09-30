@@ -4,6 +4,7 @@ import java.util.*;
 
 
 class Client {
+  int id = 001;
   public static void main(String[] args) {
 
     //Client input handling

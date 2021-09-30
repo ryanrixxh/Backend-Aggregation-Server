@@ -3,6 +3,8 @@ import java.net.*;
 import java.util.*;
 
 class ContentServer {
+  int id = 001;
+  
   public static void main(String[] args) {
 
     //ContentServer input handling
@@ -25,23 +27,22 @@ class ContentServer {
       Scanner sc = new Scanner(System.in);
       String line = null;
 
-      out.println("POST / HTTP/1.1");
+      out.println("PUT / HTTP/1.1");
       System.out.println(in.readLine());
 
       Scanner fromFile = new Scanner(new FileReader("input1.txt"));
       String toSend = fromFile.nextLine();
       out.println(toSend);
+      System.out.println(in.readLine());
 
-      while (!"exit".equalsIgnoreCase(line)) {
-        //Read from user
+      while (true) {
         line = sc.nextLine();
 
-        //Send input to AtomServer
-        out.println(line);
-        out.flush();
-
-        //Server reply
-        System.out.println("Server replied: " + in.readLine());
+        if (line.equalsIgnoreCase("exit")) {
+          sc.close();
+          socket.close();
+          break;
+        }
       }
 
       sc.close();
