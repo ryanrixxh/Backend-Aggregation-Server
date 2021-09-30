@@ -15,6 +15,8 @@ public class XMLCreator {
   public static void main(String[] args) {
 
     try {
+      Scanner sc = new Scanner(new FileReader("input_file.txt"));
+      String
       idString = Integer.toString(id);
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -23,17 +25,31 @@ public class XMLCreator {
 
       Element rootElement = doc.createElement("feed");
       doc.appendChild(rootElement);
+      Element first_entry = doc.createElement("entry");
+      rootElement.appendChild(first_entry);
+      Attr first_atr = doc.createAttribute("id");
+      first_atr.setValue(idString);
+      first_entry.setAttributeNode(first_atr);
 
-      Element entry = doc.createElement("entry");
-      rootElement.appendChild(entry);
+      Element current_entry = first_entry;
 
-      Attr atr = doc.createAttribute("id");
-      atr.setValue(idString);
-      entry.setAttributeNode(atr);
-
-      Element entryTitle = doc.createElement("title");
-      entryTitle.appendChild(doc.createTextNode("My example feed"));
-      entry.appendChild(entryTitle);
+      while (sc.hasNextLine()) {
+        String line = sc.nextLine();
+        if (line.equals("entry")) {
+          Element entry = doc.createElement("entry");
+          rootElement.appendChild(entry);
+          Attr atr = doc.createAttribute("id");
+          atr.setValue(idString);
+          entry.setAttributeNode(atr);
+          current_entry = entry;
+        }
+        else {
+          String[] split = line.split(":");
+          Element entryElement = doc.createElement(split[0]);
+          entryElement.appendChild(doc.createTextNode(split[1]));
+          current_entry.appendChild(entryElement);
+        }
+      }
 
       //Write to xml
       TransformerFactory tsf = TransformerFactory.newInstance();

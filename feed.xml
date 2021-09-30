@@ -2,5 +2,24 @@
 <feed>
  <entry id="1">
   <title>My example feed</title>
+  <subtitle>for demonstration purposes</subtitle>
+  <link>www.cs.adelaide.edu.au</link>
+  <updated>2015-08-07T18</updated>
+  <author>Santa Claus</author>
+  <id>urn</id>
+ </entry>
+ <entry id="1">
+  <title>Nick sets assignment</title>
+  <link>www.cs.adelaide.edu.au/users/third/ds/</link>
+  <id>urn</id>
+  <updated>2015-08-07T18</updated>
+  <summary>here is some plain text. Because I'm not completely evil, you can assume that this will always be less than 1000 characters. And, as I've said before, it will always be plain text.</summary>
+ </entry>
+ <entry id="1">
+  <title>second feed entry</title>
+  <link>www.cs.adelaide.edu.au/users/third/ds/14ds2s1</link>
+  <id>urn</id>
+  <updated>2015-08-07T18</updated>
+  <summary>here's another summary entry which a reader would normally use to work out if they wanted to read some more. It's quite handy.</summary>
  </entry>
 </feed>
