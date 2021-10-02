@@ -1,3 +1,5 @@
+package xml;
+
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -9,20 +11,19 @@ import org.w3c.dom.*;
 
 public class XMLCreator {
 
-  static int id = 001;
   static String idString = null;
 
   public static void main(String[] args) {
-    build("input_file.txt","feed.xml");
+    build("input_file.txt","feed.xml",1);
   }
 
   //Takes an input and builds that input into XML format
-  public static void build(String inputfile, String outputfile) {
+  public static void build(String inputfile, String outputfile, int contentId) {
 
     try {
       Scanner sc = new Scanner(new FileReader(inputfile));
       String
-      idString = Integer.toString(id);
+      idString = Integer.toString(contentId);
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
@@ -75,6 +76,7 @@ public class XMLCreator {
     catch (Exception e) {
       e.printStackTrace();
     }
+
   }
 
 }

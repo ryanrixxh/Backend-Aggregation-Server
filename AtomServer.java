@@ -2,6 +2,17 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import org.w3c.dom.*;
+
+import xml.XMLInputStream;
+import xml.XMLOutputStream;
+import xml.XMLReceiver;
+import xml.XMLSender;
+
 public class AtomServer extends Thread {
 
   public static Queue<String> feed = new LinkedList<>();
@@ -86,6 +97,17 @@ public class AtomServer extends Thread {
 
         //Get input stream of ContentServer
         in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
+
+        //Recieve XML Input from ContentServer
+        XMLInputStream xmlInput = new XMLInputStream(c_serverSocket.getInputStream());
+        XMLReceiver rec = new XMLReceiver();
+        Document newFeed = rec.receive(xmlInput);
+
+        TransformerFactory tsf = TransformerFactory.newInstance();
+        Transformer ts = tsf.newTransformer();
+        DOMSource source = new DOMSource(newFeed);
+        StreamResult console = new StreamResult(System.out);
+        ts.transform(source, console);
 
         String line;
         line = in.readLine();
