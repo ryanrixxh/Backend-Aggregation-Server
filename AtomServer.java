@@ -10,6 +10,7 @@ public class AtomServer extends Thread {
     ServerSocket server = null;
 
     try {
+      File ATOMFeed = new File("ATOMfeed.xml");
 
       //Server listens to ServerSocket port
       server = new ServerSocket(4567);
@@ -45,7 +46,7 @@ public class AtomServer extends Thread {
 
       }
     }
-    catch (IOException e) {
+    catch (Exception e) {
       e.printStackTrace();
     }
     finally {
@@ -92,12 +93,9 @@ public class AtomServer extends Thread {
         System.out.printf("From ContentServer: %s\n", line);
         feed.add(line);
         out.println("200 - Success");
-        
+
       }
-      catch (IOException e) {
-        e.printStackTrace();
-      }
-      catch (InterruptedException e) {
+      catch (Exception e) {
         e.printStackTrace();
       }
       finally {

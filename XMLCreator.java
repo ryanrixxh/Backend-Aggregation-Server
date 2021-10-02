@@ -13,9 +13,14 @@ public class XMLCreator {
   static String idString = null;
 
   public static void main(String[] args) {
+    build("input_file.txt","feed.xml");
+  }
+
+  //Takes an input and builds that input into XML format
+  public static void build(String inputfile, String outputfile) {
 
     try {
-      Scanner sc = new Scanner(new FileReader("input_file.txt"));
+      Scanner sc = new Scanner(new FileReader(inputfile));
       String
       idString = Integer.toString(id);
 
@@ -55,7 +60,7 @@ public class XMLCreator {
       TransformerFactory tsf = TransformerFactory.newInstance();
       Transformer ts = tsf.newTransformer();
       DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(new File("feed.xml"));
+      StreamResult result = new StreamResult(new File(outputfile));
       ts.setOutputProperty(OutputKeys.INDENT, "yes");
       ts.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,"yes");
       ts.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
