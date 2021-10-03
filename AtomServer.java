@@ -95,21 +95,8 @@ public class AtomServer extends Thread {
         in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
 
         //Recieve XML Input from ContentServer
-        String xml = in.readLine();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(xml);
-        // DOMSource print = new DOMSource(doc);
-        //
-        // TransformerFactory tsf = TransformerFactory.newInstance();
-        // Transformer ts = tsf.newTransformer();
-        // StreamResult result = new StreamResult(System.out);
-        // ts.transform(print,result);
-
-
-
-        // String line = in.readLine();
-        // System.out.printf("From ContentServer: %s\n", line);
+        String xml_string = in.readLine();
+        System.out.printf("From ContentServer: %s\n", xml_string);
         out.println("200 - Success");
 
       }

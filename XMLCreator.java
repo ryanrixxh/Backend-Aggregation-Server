@@ -67,7 +67,6 @@ public class XMLCreator {
       StreamResult result = new StreamResult(sw);
       ts.transform(source,result);
       new_string = sw.toString();
-      System.out.println("XML Creator: " + new_string);
       ts.transform(source, result);
 
 

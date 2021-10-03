@@ -46,13 +46,9 @@ class ContentServer {
       XMLCreator creator = new XMLCreator();
       String toSend = creator.build("input_file.txt","feed.xml",id);
 
-      System.out.println(toSend);
-
-      // DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-      //out.close();
-
-      // out_w.println("Am I alive?");
-      // in.readLine();
+      System.out.println("Sending: " + toSend);
+      out_w.println(toSend);
+      System.out.println(in.readLine());
 
       while (true) {
         line = sc.nextLine();
