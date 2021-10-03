@@ -12,13 +12,15 @@ import org.w3c.dom.*;
 public class XMLCreator {
 
   static String idString = null;
+  static Document doc = null;
+  static String new_string = null;
 
   public static void main(String[] args) {
     build("input_file.txt","feed.xml",1);
   }
 
   //Takes an input and builds that input into XML format
-  public static void build(String inputfile, String outputfile, int contentId) {
+  public static String build(String inputfile, String outputfile, int contentId) {
 
     try {
       Scanner sc = new Scanner(new FileReader(inputfile));
@@ -27,7 +29,7 @@ public class XMLCreator {
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
-      Document doc = db.newDocument();
+      doc = db.newDocument();
 
       Element rootElement = doc.createElement("feed");
       doc.appendChild(rootElement);
@@ -57,24 +59,28 @@ public class XMLCreator {
         }
       }
 
-      //Write to xml
+      //Write to string
       TransformerFactory tsf = TransformerFactory.newInstance();
       Transformer ts = tsf.newTransformer();
       DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(new File(outputfile));
-      ts.setOutputProperty(OutputKeys.INDENT, "yes");
-      ts.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,"yes");
-      ts.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
+      StringWriter sw = new StringWriter();
+      StreamResult result = new StreamResult(sw);
+      ts.transform(source,result);
+      new_string = sw.toString();
+      System.out.println("XML Creator: " + new_string);
       ts.transform(source, result);
 
 
-      //Output
-      StreamResult console = new StreamResult(System.out);
-      ts.transform(source, console);
+      // //Output
+      // StreamResult console = new StreamResult(System.out);
+      // ts.transform(source, console);
 
     }
     catch (Exception e) {
       e.printStackTrace();
+    }
+    finally {
+      return new_string;
     }
 
   }

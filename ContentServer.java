@@ -10,10 +10,6 @@ import org.w3c.dom.*;
 
 
 import xml.XMLCreator;
-import xml.XMLInputStream;
-import xml.XMLOutputStream;
-import xml.XMLReceiver;
-import xml.XMLSender;
 
 class ContentServer {
   public static int id = 001;
@@ -28,36 +24,39 @@ class ContentServer {
     String cutName = servername.replace("/", "");
     int port = Integer.parseInt(split[2]);
 
-    XMLCreator creator = new XMLCreator();
-    creator.build("input_file.txt","feed.xml",id);
-    File fileSend = new File("feed.xml");
-
 
     try (Socket socket = new Socket(cutName, port)) {
 
       //write to AtomServer
-      //PrintWriter out_w = new PrintWriter(socket.getOutputStream(), true);
-
-      //XML transfer to ATOM
-      XMLOutputStream os = new XMLOutputStream(socket.getOutputStream());
-      XMLSender out = new XMLSender();
+      PrintWriter out_w = new PrintWriter(socket.getOutputStream(), true);
 
       //Read from AtomServer
       BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+
       Scanner sc = new Scanner(System.in);
       String line = null;
 
-      //out_w.println("PUT / HTTP/1.1");
+      out_w.println("PUT / HTTP/1.1");
       System.out.println(in.readLine());
 
-      Scanner fromFile = new Scanner(new FileReader("feed.xml"));
-      String toSend = fromFile.nextLine();
-      out_w.println(toSend);
-      System.out.println(in.readLine());
+      //XML Output to Server
+      TransformerFactory tsf = TransformerFactory.newInstance();
+      Transformer ts = tsf.newTransformer();
+      XMLCreator creator = new XMLCreator();
+      String toSend = creator.build("input_file.txt","feed.xml",id);
+
+      System.out.println(toSend);
+
+      // DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+      //out.close();
+
+      // out_w.println("Am I alive?");
+      // in.readLine();
 
       while (true) {
         line = sc.nextLine();
+
 
         if (line.equalsIgnoreCase("exit")) {
           sc.close();
@@ -65,10 +64,8 @@ class ContentServer {
           break;
         }
       }
-
-      sc.close();
     }
-    catch (IOException e) {
+    catch (Exception e) {
       e.printStackTrace();
     }
   }
