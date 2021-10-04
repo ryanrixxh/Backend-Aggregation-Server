@@ -18,8 +18,24 @@ public class XMLPrinter {
       Document doc = db.parse(new ByteArrayInputStream(xml_string.getBytes("UTF-8")));
       doc.getDocumentElement().normalize();
 
-      Element root = doc.getDocumentElement();
-      System.out.println(doc.getDocumentElement().getNodeName() + " " + root.getAttribute("id"));
+      NodeList nList = doc.getElementsByTagName("*");
+      String name = "";
+
+      for(int temp = 0; temp < nList.getLength(); temp++) {
+        Node node = nList.item(temp);
+        Element e = (Element) node;
+        name = e.getNodeName();
+
+        if(name.equals("feed")) {
+          System.out.println(name + " " + e.getAttribute("id"));
+          System.out.println("-------");
+        } else if (name.equals("entry")) {
+          System.out.println("");
+          System.out.println(name);
+        } else {
+          System.out.println(name + ": " + e.getTextContent());
+        }
+      }
 
 
 

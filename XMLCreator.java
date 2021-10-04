@@ -52,9 +52,6 @@ public class XMLCreator {
         if (line.equals("entry")) {
           Element entry = doc.createElement("entry");
           rootElement.appendChild(entry);
-          Attr atr = doc.createAttribute("id");
-          atr.setValue(idString);
-          entry.setAttributeNode(atr);
           current_entry = entry;
         }
         else {
