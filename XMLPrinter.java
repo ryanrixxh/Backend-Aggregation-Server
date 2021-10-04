@@ -10,7 +10,7 @@ public class XMLPrinter {
 
   }
 
-  public static void print(String xml_string) {
+  public static void print(String xml_string, int num) {
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
@@ -27,7 +27,8 @@ public class XMLPrinter {
         name = e.getNodeName();
 
         if(name.equals("feed")) {
-          System.out.println(name + " " + e.getAttribute("id"));
+          System.out.println("");
+          System.out.println(name + " " + num + " from ContentServer " + e.getAttribute("id"));
           System.out.println("-------");
         } else if (name.equals("entry")) {
           System.out.println("");

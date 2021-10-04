@@ -39,7 +39,10 @@ class Client {
       List<String> currentFeed = (List<String>) inObj.readObject();
 
       XMLPrinter printer = new XMLPrinter();
-      printer.print(currentFeed.get(0));
+
+      for(int i = 0; i < currentFeed.size(); i++) {
+        printer.print(currentFeed.get(i), i + 1);
+      }
 
       if (currentFeed instanceof List) {
       } else {
