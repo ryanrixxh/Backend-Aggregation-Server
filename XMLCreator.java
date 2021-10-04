@@ -36,8 +36,14 @@ public class XMLCreator {
       Element first_entry = doc.createElement("entry");
       rootElement.appendChild(first_entry);
       Attr first_atr = doc.createAttribute("id");
+      Attr xmlLang = doc.createAttribute("xml:lang");
+      Attr xmlns = doc.createAttribute("xmlns");
       first_atr.setValue(idString);
-      first_entry.setAttributeNode(first_atr);
+      xmlLang.setValue("en-US");
+      xmlns.setValue("http://www.w3.org/2005/Atom");
+      rootElement.setAttributeNode(first_atr);
+      rootElement.setAttributeNode(xmlLang);
+      rootElement.setAttributeNode(xmlns);
 
       Element current_entry = first_entry;
 

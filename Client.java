@@ -1,3 +1,5 @@
+import xml.XMLPrinter;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -34,10 +36,12 @@ class Client {
       ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
 
       @SuppressWarnings("unchecked")
-      Queue<String> currentFeed = (Queue<String>) inObj.readObject();
+      List<String> currentFeed = (List<String>) inObj.readObject();
 
-      if (currentFeed instanceof Queue) {
-        System.out.println(currentFeed);
+      XMLPrinter printer = new XMLPrinter();
+      printer.print(currentFeed.get(0));
+
+      if (currentFeed instanceof List) {
       } else {
         System.out.println("Error: Object is not a feed");
       }

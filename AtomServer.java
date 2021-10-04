@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 
 public class AtomServer extends Thread {
 
-  public static Queue<String> feed = new LinkedList<>();
+  public static List<String> feed = new LinkedList<>();
 
   public static void main(String[] args) {
     ServerSocket server = null;
