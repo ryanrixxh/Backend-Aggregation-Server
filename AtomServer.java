@@ -1,6 +1,13 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.nio.charset.Charset;
+
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import org.w3c.dom.*;
 
 public class AtomServer extends Thread {
 
@@ -10,6 +17,7 @@ public class AtomServer extends Thread {
     ServerSocket server = null;
 
     try {
+      File ATOMFeed = new File("ATOMfeed.xml");
 
       //Server listens to ServerSocket port
       server = new ServerSocket(4567);
@@ -29,14 +37,15 @@ public class AtomServer extends Thread {
 
         //Send initial successful connection response
         init.println("201 - HTTP CREATED");
+        init.flush();
 
         //Create new thread.
-        if(type.equals("ContentServer")) {
+        if(type.equals("PUT / HTTP/1.1")) {
           System.out.println("type is server");
           ContentHandler s_handler = new ContentHandler(socket);
           new Thread(s_handler).start();
         }
-        else if (type.equals("Client")) {
+        else if (type.equals("GET / HTTP/1.1")) {
           System.out.println("type is client");
           ClientHandler c_handler = new ClientHandler(socket);
           new Thread(c_handler).start();
@@ -44,7 +53,7 @@ public class AtomServer extends Thread {
 
       }
     }
-    catch (IOException e) {
+    catch (Exception e) {
       e.printStackTrace();
     }
     finally {
@@ -85,15 +94,13 @@ public class AtomServer extends Thread {
         //Get input stream of ContentServer
         in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
 
-        String line;
-        while ((line = in.readLine()) != null) {
-          //Show recieved ContentServer message
-          System.out.printf("From ContentServer: %s\n", line);
-          feed.add(line);
-          out.println("200 - Success");
-        }
+        //Recieve XML Input from ContentServer
+        String xml_string = in.readLine();
+        System.out.printf("From ContentServer: %s\n", xml_string);
+        out.println("200 - Success");
+
       }
-      catch (IOException e) {
+      catch (Exception e) {
         e.printStackTrace();
       }
       finally {
@@ -124,11 +131,16 @@ public class AtomServer extends Thread {
     public void run() {
       PrintWriter out = null;
       BufferedReader in = null;
+      ObjectOutputStream obj = null;
 
       try {
         System.out.println("Starting Client Thread ...");
         //Get the output of ContentServer
         out = new PrintWriter(client_socket.getOutputStream(), true);
+
+        //Create an object stream to send the feed (or some other object in future)
+        obj = new ObjectOutputStream(client_socket.getOutputStream());
+        obj.writeObject(feed);
 
         //Get input stream of ContentServer
         in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
