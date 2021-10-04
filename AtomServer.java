@@ -96,7 +96,7 @@ public class AtomServer extends Thread {
 
         //Recieve XML Input from ContentServer
         String xml_string = in.readLine();
-        feed.addLine();
+        feed.add(xml_string);
         System.out.printf("From ContentServer: %s\n", xml_string);
         out.println("200 - Success");
 
