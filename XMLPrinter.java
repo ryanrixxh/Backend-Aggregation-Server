@@ -6,6 +6,8 @@ import org.w3c.dom.*;
 
 
 public class XMLPrinter {
+  static Document doc = null;
+
   public static void main(String[] args) {
 
   }
@@ -15,7 +17,7 @@ public class XMLPrinter {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
 
-      Document doc = db.parse(new ByteArrayInputStream(xml_string.getBytes("UTF-8")));
+      doc = db.parse(new ByteArrayInputStream(xml_string.getBytes("UTF-8")));
       doc.getDocumentElement().normalize();
 
       NodeList nList = doc.getElementsByTagName("*");
@@ -37,13 +39,25 @@ public class XMLPrinter {
           System.out.println(name + ": " + e.getTextContent());
         }
       }
-
-
-
     }
     catch (Exception e) {
       e.printStackTrace();
     }
-
   }
+
+  public static Document parse_string(String xml_string) {
+    try {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder db = dbf.newDocumentBuilder();
+
+      doc = db.parse(new ByteArrayInputStream(xml_string.getBytes("UTF-8")));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    finally {
+      return doc;
+    }
+  }
+
 }

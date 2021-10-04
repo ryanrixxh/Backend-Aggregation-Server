@@ -19,13 +19,13 @@ class ContentServer {
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
     String str = input.nextLine();
-    String[] split = str.split(":");
-    String servername = split[1];
-    String cutName = servername.replace("/", "");
-    int port = Integer.parseInt(split[2]);
+    String cutName = str.replace("https://","");
+    String[] split = cutName.split(":");
+    String servername = split[0];
+    int port = Integer.parseInt(split[1]);
 
 
-    try (Socket socket = new Socket(cutName, port)) {
+    try (Socket socket = new Socket(servername, port)) {
 
       //write to AtomServer
       PrintWriter out_w = new PrintWriter(socket.getOutputStream(), true);
@@ -51,14 +51,8 @@ class ContentServer {
       System.out.println(in.readLine());
 
       while (true) {
-        line = sc.nextLine();
-
-
-        if (line.equalsIgnoreCase("exit")) {
-          sc.close();
-          socket.close();
-          break;
-        }
+        Thread.sleep(12000);
+        out_w.println(1);
       }
     }
     catch (Exception e) {

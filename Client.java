@@ -13,13 +13,13 @@ class Client {
     //Client input handling
     Scanner input = new Scanner(System.in);
     String str = input.nextLine();
-    String[] split = str.split(":");
-    String servername = split[1];
-    String cutName = servername.replace("/", "");
-    int port = Integer.parseInt(split[2]);
+    String cutName = str.replace("https://","");
+    String[] split = cutName.split(":");
+    String servername = split[0];
+    int port = Integer.parseInt(split[1]);
 
     //Socket Connection using input
-    try (Socket socket = new Socket(cutName, port)) {
+    try (Socket socket = new Socket(servername, port)) {
 
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);

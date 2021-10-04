@@ -9,6 +9,8 @@ import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 
+import xml.XMLPrinter;
+
 public class AtomServer extends Thread {
 
   public static List<String> feed = new LinkedList<>();
@@ -99,6 +101,38 @@ public class AtomServer extends Thread {
         feed.add(xml_string);
         System.out.printf("From ContentServer: %s\n", xml_string);
         out.println("200 - Success");
+
+        //Parse into XML to find ContentServer ID
+        XMLPrinter printer = new XMLPrinter();
+        Document doc = printer.parse_string(xml_string);
+        NodeList nList = doc.getElementsByTagName("feed");
+        Node node = nList.item(0);
+        Element e = (Element) node;
+        String content_id = e.getAttribute("id");
+
+
+        //Reads heartbeat until disconnect occurs
+        while (true) {
+          Thread.sleep(12000);
+          String i = in.readLine();
+
+          //If heartbeat does not occur find all associated feeds and delete
+          if(i == null) {
+            System.out.println("Disconnected");
+            String tester = "id=\"" + content_id + "\"";
+            System.out.println(tester);
+
+            for(int x = 0; x < feed.size(); x++) {
+              if (feed.get(x).contains(tester)) {
+                System.out.println("Feed " + x + " is from ContentServer " + content_id);
+                feed.remove(feed.get(x));
+                x = x-1;
+              }
+            }
+            System.out.println("New Feed: " + feed);
+            break;
+          }
+        }
 
       }
       catch (Exception e) {

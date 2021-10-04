@@ -73,10 +73,6 @@ public class XMLCreator {
       ts.transform(source, result);
 
 
-      // //Output
-      // StreamResult console = new StreamResult(System.out);
-      // ts.transform(source, console);
-
     }
     catch (Exception e) {
       e.printStackTrace();
