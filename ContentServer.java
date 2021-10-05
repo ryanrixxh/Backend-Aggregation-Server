@@ -19,12 +19,13 @@ class ContentServer {
 
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
-    id = args[0];
-    inputfile = args[1];
-    String str = args[2];
+    id = input.nextLine();
+    inputfile = input.nextLine();
+    String str = input.nextLine();
     String cutName = str.replace("https://","");
     String[] split = cutName.split(":");
     String servername = split[0];
+
     int port = Integer.parseInt(split[1]);
 
 
@@ -41,7 +42,8 @@ class ContentServer {
       String line = null;
 
       out_w.println("PUT / HTTP/1.1");
-      System.out.println(in.readLine());
+      String server_response = in.readLine();
+      System.out.println(server_response);
 
       //XML Output to Server
       buildThenSend(out_w, inputfile, id);

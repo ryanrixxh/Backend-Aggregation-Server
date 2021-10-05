@@ -72,10 +72,6 @@ public class XMLCreator {
       ts.transform(source, result);
 
     }
-    catch (DOMException e) {
-      System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
-      System.exit(1);
-    }
     catch (IOException e) {
       e.printStackTrace();
     }

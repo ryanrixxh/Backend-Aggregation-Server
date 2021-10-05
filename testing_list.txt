@@ -1,0 +1,6 @@
+- Test basic connections ContentServer < AtomServer > Client: basic_connection_test.sh
+- Test more than 20 feed inserts: over_20_test.sh
+- Test Invalid Inputs: bad_input_test.sh
+- Test Dead Server: dead_test.sh
+- Test Server reboot: server_reboot_test.sh
+- Pretty Print Testing: pretty_test.sh
