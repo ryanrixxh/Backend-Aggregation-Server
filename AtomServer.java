@@ -3,6 +3,7 @@ import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
 
+
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -15,6 +16,7 @@ import xml.Packet;
 public class AtomServer extends Thread {
 
   public static List<String> feed = new LinkedList<>();
+  public static int lamport_timestamp = 0;
 
   public static void main(String[] args) {
     ServerSocket server = null;
@@ -86,8 +88,9 @@ public class AtomServer extends Thread {
 
     public void run() {
       PrintWriter out = null;
-       BufferedReader in = null;
+      BufferedReader in = null;
       ObjectInputStream inObj = null;
+      ObjectOutputStream outObj = null;
       Packet packet = null;
 
 
@@ -98,16 +101,17 @@ public class AtomServer extends Thread {
         out = new PrintWriter(c_serverSocket.getOutputStream(), true);
 
         //Get input stream of ContentServer
-        //in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
         inObj = new ObjectInputStream(c_serverSocket.getInputStream());
+        outObj = new ObjectOutputStream(c_serverSocket.getOutputStream());
         packet = (Packet) inObj.readObject();
+        lamport_timestamp = Math.max(packet.timestamp, lamport_timestamp) + 1;
+        System.out.println("Current timestamp: " + lamport_timestamp);
         //Recieve XML Input from ContentServer
         String xml_string = packet.xml;
 
         if (xml_string != null) {
         feed.add(xml_string);
-        System.out.printf("From ContentServer: %s\n", xml_string);
-        out.println("200 - Success");
 
         //Parse into XML to find ContentServer ID
         XMLPrinter printer = new XMLPrinter();
@@ -117,32 +121,36 @@ public class AtomServer extends Thread {
         Element e = (Element) node;
         String content_id = e.getAttribute("id");
 
+        lamport_timestamp++;
+        Packet response_packet = new Packet("200 - Success", lamport_timestamp);
+        outObj.writeObject(response_packet);
 
         //Reads heartbeat until disconnect occurs
         while (true) {
           Thread.sleep(12000);
           String i = in.readLine();
+          if (i.equals("PUT")) {
+            System.out.println(i);
+          }
 
           //If heartbeat does not occur find all associated feeds and delete
           if(i == null) {
-            System.out.println("Disconnected");
+            System.out.println("Content Server " + content_id + " Disconnected");
             String tester = "id=\"" + content_id + "\"";
-            System.out.println(tester);
 
             for(int x = 0; x < feed.size(); x++) {
               if (feed.get(x).contains(tester)) {
-                System.out.println("Feed " + x + " is from ContentServer " + content_id);
+                System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
                 feed.remove(feed.get(x));
                 x = x-1;
               }
             }
-            System.out.println("New Feed: " + feed);
             break;
           }
         }
       } else {
-        System.out.println("Error: Recieved empty XML");
-        out.println("Server Error: Recieved empty XML");
+        System.out.println("Error: Recieved empty XML. Sending 204");
+        out.println("204 - No Content");
       }
 
       }
@@ -217,4 +225,5 @@ public class AtomServer extends Thread {
     }
   }
 
+  private static void recieve()
 }

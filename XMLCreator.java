@@ -73,7 +73,7 @@ public class XMLCreator {
 
     }
     catch (IOException e) {
-      e.printStackTrace();
+      System.out.println("Broken or missing file.");
     }
     finally {
       return new_string;

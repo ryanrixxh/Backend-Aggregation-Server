@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
+import java.math.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -15,9 +16,11 @@ import xml.Packet;
 class ContentServer {
   public static String id = null;
   public static String inputfile = null;
-  public static int lamport_timestamp = 1;
+  public static int lamport_timestamp = 0;
 
   public static void main(String[] args) {
+
+    System.out.println("Initial timestamp: " + lamport_timestamp);
 
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
@@ -49,13 +52,29 @@ class ContentServer {
 
       //XML Output to Server
       buildThenSend(out_w, inputfile, id, socket);
+      ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
+      Packet response_packet = (Packet) inObj.readObject();
 
-      System.out.println(in.readLine());
+      String response = response_packet.xml;
+      int response_stamp = response_packet.timestamp;
+      lamport_timestamp =  Math.max(response_stamp, lamport_timestamp) + 1;
+      System.out.println(response);
+      System.out.println("Current Timestamp: " + lamport_timestamp);
 
-      while (true) {
-        Thread.sleep(12000);
-        out_w.println(1);
-      }
+      if(response.equals("200 - Success"))
+        while (true) {
+          String new_input = null;
+          new_input = input.nextLine();
+          Thread.sleep(12000);
+          if(new_input != null) {
+            out_w.println("PUT");
+          } else {
+            out_w.println("1");
+          }
+        }
+    }
+    catch (IOException e) {
+      System.out.println("Broken or missing file.");
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -71,6 +90,7 @@ class ContentServer {
 
 
     ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
+    lamport_timestamp++;
     Packet packet = new Packet(toSend, lamport_timestamp);
     // List<Packet> packetlist = new LinkedList<>();
     // packetlist.add(packet);
