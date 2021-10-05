@@ -68,17 +68,21 @@ class ContentServer {
     Transformer ts = tsf.newTransformer();
     XMLCreator creator = new XMLCreator();
     String toSend = creator.build(input,id);
-    System.out.println("Sending: " + toSend);
-    out_channel.println(toSend);
+
 
     ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
     Packet packet = new Packet(toSend, lamport_timestamp);
+    // List<Packet> packetlist = new LinkedList<>();
+    // packetlist.add(packet);
+    System.out.println("Sending: " + packet.xml);
+    obj.writeObject(packet);
+
     }
     catch (DOMException e) {
       System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
     }
     catch (Exception e) {
-      System.out.println("Error");
+      e.printStackTrace();
     }
   }
 }

@@ -10,6 +10,7 @@ import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 
 import xml.XMLPrinter;
+import xml.Packet;
 
 public class AtomServer extends Thread {
 
@@ -85,7 +86,10 @@ public class AtomServer extends Thread {
 
     public void run() {
       PrintWriter out = null;
-      BufferedReader in = null;
+       BufferedReader in = null;
+      ObjectInputStream inObj = null;
+      Packet packet = null;
+
 
       try {
         System.out.println("Starting ContentHandler Thread ...");
@@ -94,10 +98,11 @@ public class AtomServer extends Thread {
         out = new PrintWriter(c_serverSocket.getOutputStream(), true);
 
         //Get input stream of ContentServer
-        in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
-
+        //in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
+        inObj = new ObjectInputStream(c_serverSocket.getInputStream());
+        packet = (Packet) inObj.readObject();
         //Recieve XML Input from ContentServer
-        String xml_string = in.readLine();
+        String xml_string = packet.xml;
 
         if (xml_string != null) {
         feed.add(xml_string);
