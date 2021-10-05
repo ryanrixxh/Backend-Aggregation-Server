@@ -16,16 +16,16 @@ public class XMLCreator {
   static String new_string = null;
 
   public static void main(String[] args) {
-    build("input_file.txt","feed.xml",1);
+    
   }
 
   //Takes an input and builds that input into XML format
-  public static String build(String inputfile, String outputfile, int contentId) {
+  public static String build(String inputfile, String contentId) {
 
     try {
       Scanner sc = new Scanner(new FileReader(inputfile));
       String
-      idString = Integer.toString(contentId);
+      idString = contentId;
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();

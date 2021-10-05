@@ -12,12 +12,15 @@ import org.w3c.dom.*;
 import xml.XMLCreator;
 
 class ContentServer {
-  public static int id = 001;
+  public static String id = null;
 
   public static void main(String[] args) {
 
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
+    System.out.println("Choose any integer for id: ");
+    id = input.nextLine();
+    System.out.println("Enter <connection address>:<port> to make a connection: ");
     String str = input.nextLine();
     String cutName = str.replace("https://","");
     String[] split = cutName.split(":");
@@ -44,7 +47,7 @@ class ContentServer {
       TransformerFactory tsf = TransformerFactory.newInstance();
       Transformer ts = tsf.newTransformer();
       XMLCreator creator = new XMLCreator();
-      String toSend = creator.build("input_file.txt","feed.xml",id);
+      String toSend = creator.build("input_file.txt",id);
 
       System.out.println("Sending: " + toSend);
       out_w.println(toSend);
