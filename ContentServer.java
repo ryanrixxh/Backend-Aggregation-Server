@@ -13,6 +13,7 @@ import xml.XMLCreator;
 
 class ContentServer {
   public static String id = null;
+  public static String inputfile = null;
 
   public static void main(String[] args) {
 
@@ -20,6 +21,8 @@ class ContentServer {
     Scanner input = new Scanner(System.in);
     System.out.println("Choose any integer for id: ");
     id = input.nextLine();
+    System.out.println("State the input file you wish to upload: ");
+    inputfile = input.nextLine();
     System.out.println("Enter <connection address>:<port> to make a connection: ");
     String str = input.nextLine();
     String cutName = str.replace("https://","");
@@ -44,13 +47,8 @@ class ContentServer {
       System.out.println(in.readLine());
 
       //XML Output to Server
-      TransformerFactory tsf = TransformerFactory.newInstance();
-      Transformer ts = tsf.newTransformer();
-      XMLCreator creator = new XMLCreator();
-      String toSend = creator.build("input_file.txt",id);
+      buildThenSend(out_w, inputfile, id);
 
-      System.out.println("Sending: " + toSend);
-      out_w.println(toSend);
       System.out.println(in.readLine());
 
       while (true) {
@@ -63,5 +61,21 @@ class ContentServer {
     }
   }
 
-
+  private static void buildThenSend(PrintWriter out_channel, String input, String id) {
+    try {
+    TransformerFactory tsf = TransformerFactory.newInstance();
+    Transformer ts = tsf.newTransformer();
+    XMLCreator creator = new XMLCreator();
+    String toSend = creator.build(input,id);
+    System.out.println("Sending: " + toSend);
+    out_channel.println(toSend);
+    }
+    catch (DOMException e) {
+      System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
+      in.readLine();
+    }
+    catch (Exception e) {
+      System.out.println("Error");
+    }
+  }
 }

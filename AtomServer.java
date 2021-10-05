@@ -98,6 +98,8 @@ public class AtomServer extends Thread {
 
         //Recieve XML Input from ContentServer
         String xml_string = in.readLine();
+
+        if (xml_string != null) {
         feed.add(xml_string);
         System.out.printf("From ContentServer: %s\n", xml_string);
         out.println("200 - Success");
@@ -133,6 +135,10 @@ public class AtomServer extends Thread {
             break;
           }
         }
+      } else {
+        System.out.println("Error: Recieved empty XML");
+        out.println("Server Error: Recieved empty XML");
+      }
 
       }
       catch (Exception e) {

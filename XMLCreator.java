@@ -16,7 +16,7 @@ public class XMLCreator {
   static String new_string = null;
 
   public static void main(String[] args) {
-    
+
   }
 
   //Takes an input and builds that input into XML format
@@ -24,8 +24,7 @@ public class XMLCreator {
 
     try {
       Scanner sc = new Scanner(new FileReader(inputfile));
-      String
-      idString = contentId;
+      String idString = contentId;
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
@@ -72,9 +71,12 @@ public class XMLCreator {
       new_string = sw.toString();
       ts.transform(source, result);
 
-
     }
-    catch (Exception e) {
+    catch (DOMException e) {
+      System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
+      System.exit(1);
+    }
+    catch (IOException e) {
       e.printStackTrace();
     }
     finally {
