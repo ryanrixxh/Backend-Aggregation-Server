@@ -19,12 +19,9 @@ class ContentServer {
 
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
-    System.out.println("Choose any integer for id: ");
-    id = input.nextLine();
-    System.out.println("State the input file you wish to upload: ");
-    inputfile = input.nextLine();
-    System.out.println("Enter <connection address>:<port> to make a connection: ");
-    String str = input.nextLine();
+    id = args[0];
+    inputfile = args[1];
+    String str = args[2];
     String cutName = str.replace("https://","");
     String[] split = cutName.split(":");
     String servername = split[0];
@@ -72,7 +69,6 @@ class ContentServer {
     }
     catch (DOMException e) {
       System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
-      in.readLine();
     }
     catch (Exception e) {
       System.out.println("Error");

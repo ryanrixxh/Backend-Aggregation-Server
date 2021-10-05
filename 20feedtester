@@ -1,0 +1,5 @@
+##!/usr/bin/env bash
+echo Starting ATOM Server ...
+java AtomServer
+echo Starting ContentServer 1
+java ContentServer 1 inputfile.txt localhost\:4567
