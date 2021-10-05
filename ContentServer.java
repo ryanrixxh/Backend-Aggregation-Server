@@ -10,10 +10,12 @@ import org.w3c.dom.*;
 
 
 import xml.XMLCreator;
+import xml.Packet;
 
 class ContentServer {
   public static String id = null;
   public static String inputfile = null;
+  public static int lamport_timestamp = 1;
 
   public static void main(String[] args) {
 
@@ -46,7 +48,7 @@ class ContentServer {
       System.out.println(server_response);
 
       //XML Output to Server
-      buildThenSend(out_w, inputfile, id);
+      buildThenSend(out_w, inputfile, id, socket);
 
       System.out.println(in.readLine());
 
@@ -60,7 +62,7 @@ class ContentServer {
     }
   }
 
-  private static void buildThenSend(PrintWriter out_channel, String input, String id) {
+  private static void buildThenSend(PrintWriter out_channel, String input, String id, Socket socket_channel) {
     try {
     TransformerFactory tsf = TransformerFactory.newInstance();
     Transformer ts = tsf.newTransformer();
@@ -68,6 +70,9 @@ class ContentServer {
     String toSend = creator.build(input,id);
     System.out.println("Sending: " + toSend);
     out_channel.println(toSend);
+
+    ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
+    Packet packet = new Packet(toSend, lamport_timestamp);
     }
     catch (DOMException e) {
       System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
