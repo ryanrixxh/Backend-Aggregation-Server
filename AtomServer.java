@@ -36,22 +36,25 @@ public class AtomServer extends Thread {
         //Print connection confirmation
         System.out.println("New Connection: " + socket.getInetAddress().getHostAddress() + socket.getInetAddress().getHostName());
 
-        BufferedReader type_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedReader request_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter init = new PrintWriter(socket.getOutputStream(), true);
-        String type = type_in.readLine();
+        String request = request_in.readLine();
+        for (int i = 0; i < 3; i++) {
+          request = request + "\n\r" + request_in.readLine();
+        }
 
         //Send initial successful connection response
         init.println("201 - HTTP CREATED");
         init.flush();
 
         //Create new thread.
-        if(type.equals("PUT / HTTP/1.1")) {
-          System.out.println("type is server");
+        if(request.contains("PUT /atom.xml HTTP/1.1")) {
+          System.out.println(request);
           ContentHandler s_handler = new ContentHandler(socket);
           new Thread(s_handler).start();
         }
-        else if (type.equals("GET / HTTP/1.1")) {
-          System.out.println("type is client");
+        else if (request.contains("GET / HTTP/1.1")) {
+          System.out.print(request);
           ClientHandler c_handler = new ClientHandler(socket);
           new Thread(c_handler).start();
         }
@@ -129,12 +132,8 @@ public class AtomServer extends Thread {
         while (true) {
           Thread.sleep(12000);
           String i = in.readLine();
-          if (i.equals("PUT")) {
-            System.out.println(i);
-          }
-
           //If heartbeat does not occur find all associated feeds and delete
-          if(i == null) {
+          if (i == null) {
             System.out.println("Content Server " + content_id + " Disconnected");
             String tester = "id=\"" + content_id + "\"";
 
@@ -146,6 +145,9 @@ public class AtomServer extends Thread {
               }
             }
             break;
+          }
+          else if (i.equals("PUT")) {
+            System.out.println(i);
           }
         }
       } else {
@@ -225,5 +227,7 @@ public class AtomServer extends Thread {
     }
   }
 
-  private static void recieve()
+  private static void recieve() {
+
+  }
 }

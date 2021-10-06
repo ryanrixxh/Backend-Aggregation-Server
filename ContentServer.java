@@ -45,8 +45,10 @@ class ContentServer {
 
       Scanner sc = new Scanner(System.in);
       String line = null;
+      int length = getLength(inputfile, id);
+      System.out.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
 
-      out_w.println("PUT / HTTP/1.1");
+      out_w.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
       String server_response = in.readLine();
       System.out.println(server_response);
 
@@ -67,7 +69,6 @@ class ContentServer {
           new_input = input.nextLine();
           Thread.sleep(12000);
           if(new_input != null) {
-            out_w.println("PUT");
           } else {
             out_w.println("1");
           }
@@ -78,6 +79,24 @@ class ContentServer {
     }
     catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  private static int getLength(String input, String id) {
+    int length = 0;
+    try {
+      TransformerFactory tsf = TransformerFactory.newInstance();
+      Transformer ts = tsf.newTransformer();
+      XMLCreator creator = new XMLCreator();
+      String toSend = creator.build(input,id);
+
+      length = toSend.length();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    finally {
+      return length;
     }
   }
 
