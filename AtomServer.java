@@ -23,8 +23,8 @@ public class AtomServer extends Thread {
     ServerSocket server = null;
 
     try {
-      File ATOMFeed = new File("ATOMfeed.xml");
-
+      feed = get_feed("ATOMFeed.txt");
+      System.out.println("Starting server with ATOMFeed file ...\r\nThe server had " + feed.size() + " entries perviously stored.");
       //Server listens to ServerSocket port
       server = new ServerSocket(4567);
       server.setReuseAddress(true);
@@ -43,10 +43,6 @@ public class AtomServer extends Thread {
         for (int i = 0; i < 3; i++) {
           request = request + "\n\r" + request_in.readLine();
         }
-
-        //Send initial successful connection response
-        init.println("201 - HTTP CREATED");
-        init.flush();
 
         //Create new thread.
         if(request.contains("PUT /atom.xml HTTP/1.1")) {
@@ -90,7 +86,7 @@ public class AtomServer extends Thread {
       this.c_serverSocket = socket;
     }
 
-    public void run() {
+    public void run() throws NullPointerException {
       PrintWriter out = null;
       BufferedReader in = null;
       ObjectInputStream inObj = null;
@@ -127,7 +123,6 @@ public class AtomServer extends Thread {
         boolean not_new = false;
         for(int x = 0; x < feed.size(); x++) {
           String tester = "id=\"" + content_id + "\"";
-          System.out.println(tester);
           if (feed.get(x).contains(tester)) {
             System.out.println("ContentServer " + content_id + " already has a feed. Replacing it.");
             feed.set(x,xml_string);
@@ -138,15 +133,20 @@ public class AtomServer extends Thread {
         if(not_new == false) {
           if(feed.size() < 20) {
             feed.add(xml_string);
+            store_feed(feed,"ATOMFeed.txt");
           } else {
             feed.removeFirst();
-            feed.add(xml_string);;
+            feed.add(xml_string);
+            store_feed(feed,"ATOMFeed.txt");
           }
         }
 
 
           lamport_timestamp++;
           Packet response_packet = new Packet("200 - Success", lamport_timestamp);
+          if(not_new == false) {
+            response_packet.xml = "201 - HTTP Created";
+          }
           outObj.writeObject(response_packet);
 
           //Reads heartbeat until disconnect occurs
@@ -162,6 +162,7 @@ public class AtomServer extends Thread {
                 if (feed.get(x).contains(tester)) {
                   System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
                   feed.remove(feed.get(x));
+                  store_feed(feed,"ATOMFeed.txt");
                   x = x-1;
                 }
               }
@@ -170,7 +171,9 @@ public class AtomServer extends Thread {
           }
         } else {
           System.out.println("Error: Recieved empty XML. Sending 204");
-          out.println("204 - No Content");
+          lamport_timestamp++;
+          Packet response_packet = new Packet("204 - No Content", lamport_timestamp);
+          outObj.writeObject(response_packet);
         }
       }
       catch (Exception e) {
@@ -204,28 +207,26 @@ public class AtomServer extends Thread {
     public void run() {
       PrintWriter out = null;
       BufferedReader in = null;
-      ObjectOutputStream obj = null;
+      ObjectInputStream inObj = null;
+      ObjectOutputStream outObj = null;
+
 
       try {
         System.out.println("Starting Client Thread ...");
-        //Get the output of ContentServer
-        out = new PrintWriter(client_socket.getOutputStream(), true);
 
-        //Create an object stream to send the feed (or some other object in future)
-        obj = new ObjectOutputStream(client_socket.getOutputStream());
+        inObj = new ObjectInputStream(client_socket.getInputStream());
+        System.out.println("Wheres it hanging?");
+        Packet request = (Packet) inObj.readObject();
+        System.out.println("Wheres it hanging?");
+        lamport_timestamp = Math.max(request.timestamp, lamport_timestamp) + 1;
+
+        //Send a GETPacket with the xml data and lamport timestamp to the client\
+        lamport_timestamp++;
+        outObj = new ObjectOutputStream(client_socket.getOutputStream());
         GETPacket toSend = new GETPacket(feed,lamport_timestamp);
-        obj.writeObject(toSend);
-
-        //Get input stream of ContentServer
-        in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
-
-        String line;
-        while ((line = in.readLine()) != null) {
-          System.out.printf("From Client: %s\n", line);
-          out.println(line);
-        }
+        outObj.writeObject(toSend);
       }
-      catch (IOException e) {
+      catch (Exception e) {
         e.printStackTrace();
       }
       finally {
@@ -245,7 +246,36 @@ public class AtomServer extends Thread {
     }
   }
 
-  private static void recieve() {
+  //Utility function to store a data structure in a seperate file
+  private static void store_feed(LinkedList<String> list, String file) {
+    try {
+      OutputStream fileOut = new FileOutputStream(file);
+      ObjectOutputStream fileObjOut = new ObjectOutputStream(fileOut);
+      fileObjOut.writeObject(list);
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
+  }
 
+  private static LinkedList<String> get_feed(String file) throws NullPointerException {
+    LinkedList<String> toReturn = new LinkedList<>();
+    try {
+      File fileCheck = new File(file);
+      if(fileCheck.length() > 0) {
+        FileInputStream fileIn = new FileInputStream(file);
+        ObjectInputStream objIn = new ObjectInputStream(fileIn);
+        @SuppressWarnings("unchecked")
+        LinkedList<String> stored_feed = (LinkedList<String>) objIn.readObject();
+        toReturn = stored_feed;
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+    return toReturn;
   }
 }

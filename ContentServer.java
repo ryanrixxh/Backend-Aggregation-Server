@@ -49,9 +49,6 @@ class ContentServer {
       //PUT request header through socket
       System.out.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
       out_w.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
-      String status_reply = in.readLine();
-      System.out.println(status_reply);
-
 
       //PUT request body through socket
       lamport_timestamp++;
@@ -67,7 +64,7 @@ class ContentServer {
       System.out.println("Current Timestamp: " + lamport_timestamp);
 
       //If response is successful proceed to send heartbeat
-      if(response.equals("200 - Success")) {
+      if(response.equals("200 - Success") || response.equals("201 - HTTP Created")) {
         while (true) {
           String new_input = null;
           new_input = input.nextLine();
@@ -81,6 +78,9 @@ class ContentServer {
       } else if(response.equals("204 - No Content")) {
         System.out.println("oops");
       }
+    }
+    catch (ConnectException e) {
+      System.out.println("Error: Server is offline");
     }
     catch (IOException e) {
       e.printStackTrace();

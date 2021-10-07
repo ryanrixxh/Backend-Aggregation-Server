@@ -4,6 +4,7 @@ import java.util.*;
 
 import xml.XMLPrinter;
 import xml.GETPacket;
+import xml.Packet;
 
 class Client {
   public static int id = 001;
@@ -25,27 +26,23 @@ class Client {
       //write to AtomServer
       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-      //Read from AtomServer
-      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-      Scanner sc = new Scanner(System.in);
-      String line = null;
-
-      //Increment local counter and send data
+      //Increment local counter and send request
       lamport_timestamp++;
       System.out.println("Current timestamp: " + lamport_timestamp);
       System.out.println("GET /atom.xml HTTP/1.1\r\nHost: localhost\r\nUser-Agent: " + id + "\r\nAccept: application/atom+xml");
       out.println("GET /atom.xml HTTP/1.1\r\nHost: localhost\r\nUser-Agent: " + id + "\r\nAccept: application/atom+xml");
-      System.out.println(in.readLine());
 
-      ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
+      ObjectOutputStream outObj = new ObjectOutputStream(socket.getOutputStream());
+      Packet sendPacket = new Packet("GET",lamport_timestamp);
+      lamport_timestamp++;
+      outObj.writeObject(sendPacket);
 
       //Recieve xml data and lamport timestamp from server
+      ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
       GETPacket packet = (GETPacket) inObj.readObject();
       LinkedList<String> recieved_feed = packet.xml_list;
       lamport_timestamp = Math.max(packet.timestamp, lamport_timestamp) + 1;
       System.out.println("Current timestamp: " + lamport_timestamp);
-
 
       //Use XML Printer to print the data in readable format
       if (recieved_feed instanceof List) {
@@ -58,20 +55,9 @@ class Client {
       for(int i = 0; i < recieved_feed.size(); i++) {
         printer.print(recieved_feed.get(i), i + 1);
       }
-
-      while (!"exit".equalsIgnoreCase(line)) {
-        //Read from user
-        line = sc.nextLine();
-
-        //Send input to AtomServer
-        out.println(line);
-        out.flush();
-
-        //Server reply
-        System.out.println("Server replied: " + in.readLine());
-      }
-
-      sc.close();
+    }
+    catch (ConnectException e) {
+      System.out.println("Error: Server is offline");
     }
     catch (IOException e) {
       e.printStackTrace();
