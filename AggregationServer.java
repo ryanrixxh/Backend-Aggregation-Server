@@ -14,7 +14,7 @@ import xml.XMLPrinter;
 import xml.Packet;
 import xml.GETPacket;
 
-public class AtomServer extends Thread {
+public class AggregationServer extends Thread {
 
   public static LinkedList<String> feed = new LinkedList<>();
   public static int lamport_timestamp = 0;
@@ -23,10 +23,23 @@ public class AtomServer extends Thread {
     ServerSocket server = null;
 
     try {
+      //Input Handling
+      System.out.println("Would you like to use a custom port y/n: ");
+      Scanner scIn = new Scanner(System.in);
+      String selection = scIn.nextLine();
+      int p = 4567;
+      if(selection.equals("y")) {
+        System.out.println("Port number: ");
+        String p_in = scIn.nextLine();
+        p = Integer.parseInt(p_in);
+      }
+
+      //Retrieve prior feed if it exists
       feed = get_feed("ATOMFeed.txt");
-      System.out.println("Starting server with ATOMFeed file ...\r\nThe server had " + feed.size() + " entries perviously stored.");
-      //Server listens to ServerSocket port
-      server = new ServerSocket(4567);
+      System.out.println("Starting server with ATOMFeed file ...\r\nThe server had " + feed.size() + " entries previously stored.");
+
+      //Server listens to ServerSocket on selected port
+      server = new ServerSocket(p);
       server.setReuseAddress(true);
 
       //Loop for recieving ContentServer requests
@@ -80,7 +93,9 @@ public class AtomServer extends Thread {
     }
   }
 
-  //ContentHandler
+  //ContentHandler. Handles any put requests. If it recieves XML data that it can parse it returns either
+  //200 or 201 depending on whether the connection comes from a new ID. It then stores the XML as a String in a list
+  //ready to serve on a GET request. It returns 204 if the XML it recieved is empty.
   private static class ContentHandler implements Runnable {
     private final Socket c_serverSocket;
 
@@ -189,7 +204,8 @@ public class AtomServer extends Thread {
     }
   }
 
-  //ClientHandler
+  //ClientHandler. Handles GET request. Sends a GET packet object containing the list of XML strings
+  //and a lamport timestamp for synchronization.
   private static class ClientHandler implements Runnable {
     private final Socket client_socket;
 
@@ -237,7 +253,7 @@ public class AtomServer extends Thread {
     }
   }
 
-  //If the server recieves a bad request send 400 back and do nothing else
+  //AlternateHandler. Handles bad requests and sends back a packet containing the timestamp along with an error code 400
   private static class AlternateHandler implements Runnable {
     private final Socket aSocket;
 
@@ -270,6 +286,7 @@ public class AtomServer extends Thread {
     }
   }
 
+  //Utility function to recieve a feed from any stored location.
   private static LinkedList<String> get_feed(String file) throws NullPointerException {
     LinkedList<String> toReturn = new LinkedList<>();
     try {
