@@ -1,0 +1,24 @@
+Current timestamp: 1
+GET /atom.xml HTTP/1.1
+Host: localhost
+User-Agent: 1
+Accept: application/atom+xml
+Current timestamp: 78
+
+feed 1 from ContentServer basic
+-------
+
+entry
+title: My example feed
+subtitle: for demonstration purposes
+link: www.cs.adelaide.edu.au
+updated: 2015-08-07T18
+author: Santa Claus
+id: urn
+
+entry
+title: Nick sets assignment
+link: www.cs.adelaide.edu.au/users/third/ds/
+id: urn
+updated: 2015-08-07T18
+summary: here is some plain text. Because I'm not completely evil, you can assume that this will always be less than 1000 characters. And, as I've said before, it will always be plain text.

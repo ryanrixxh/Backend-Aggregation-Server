@@ -1,0 +1,8 @@
+Initial timestamp: 0
+PUT /atom.xml HTTP/1.1
+User-Agent: 4
+Content Type: application/atom+xml
+Content Length: 672
+Sending: <?xml version="1.0" encoding="UTF-8" standalone="no"?><feed xmlns="http://www.w3.org/2005/Atom" id="4" xml:lang="en-US"><entry><title>My example feed 4</title><subtitle>for demonstration purposes</subtitle><link>www.cs.adelaide.edu.au</link><updated>2015-08-07T18</updated><author>Santa Claus</author><id>urn</id></entry><entry><title>Nick sets assignment</title><link>www.cs.adelaide.edu.au/users/third/ds/</link><id>urn</id><updated>2015-08-07T18</updated><summary>here is some plain text. Because I'm not completely evil, you can assume that this will always be less than 1000 characters. And, as I've said before, it will always be plain text.</summary></entry></feed>
+200 - Success
+Current Timestamp: 11

@@ -1,0 +1,8 @@
+Initial timestamp: 0
+PUT /atom.xml HTTP/1.1
+User-Agent: evil
+Content Type: application/atom+xml
+Content Length: 0
+204 - No Content
+Current Timestamp: 4
+Server did not store request
