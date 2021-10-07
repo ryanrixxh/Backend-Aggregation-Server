@@ -6,7 +6,7 @@ import xml.XMLPrinter;
 import xml.GETPacket;
 import xml.Packet;
 
-class Client {
+class GETClient {
   public static int id = 001;
   public static int lamport_timestamp = 0;
 
