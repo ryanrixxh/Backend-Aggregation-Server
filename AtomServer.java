@@ -12,10 +12,11 @@ import org.w3c.dom.*;
 
 import xml.XMLPrinter;
 import xml.Packet;
+import xml.GETPacket;
 
 public class AtomServer extends Thread {
 
-  public static List<String> feed = new LinkedList<>();
+  public static LinkedList<String> feed = new LinkedList<>();
   public static int lamport_timestamp = 0;
 
   public static void main(String[] args) {
@@ -53,7 +54,7 @@ public class AtomServer extends Thread {
           ContentHandler s_handler = new ContentHandler(socket);
           new Thread(s_handler).start();
         }
-        else if (request.contains("GET / HTTP/1.1")) {
+        else if (request.contains("GET /atom.xml HTTP/1.1")) {
           System.out.print(request);
           ClientHandler c_handler = new ClientHandler(socket);
           new Thread(c_handler).start();
@@ -113,9 +114,6 @@ public class AtomServer extends Thread {
         //Recieve XML Input from ContentServer
         String xml_string = packet.xml;
 
-        if (xml_string != null) {
-        feed.add(xml_string);
-
         //Parse into XML to find ContentServer ID
         XMLPrinter printer = new XMLPrinter();
         Document doc = printer.parse_string(xml_string);
@@ -124,37 +122,56 @@ public class AtomServer extends Thread {
         Element e = (Element) node;
         String content_id = e.getAttribute("id");
 
-        lamport_timestamp++;
-        Packet response_packet = new Packet("200 - Success", lamport_timestamp);
-        outObj.writeObject(response_packet);
-
-        //Reads heartbeat until disconnect occurs
-        while (true) {
-          Thread.sleep(12000);
-          String i = in.readLine();
-          //If heartbeat does not occur find all associated feeds and delete
-          if (i == null) {
-            System.out.println("Content Server " + content_id + " Disconnected");
-            String tester = "id=\"" + content_id + "\"";
-
-            for(int x = 0; x < feed.size(); x++) {
-              if (feed.get(x).contains(tester)) {
-                System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
-                feed.remove(feed.get(x));
-                x = x-1;
-              }
-            }
-            break;
-          }
-          else if (i.equals("PUT")) {
-            System.out.println(i);
+        if (xml_string != null) {
+        //If a feed from this id is already here, replace it
+        boolean not_new = false;
+        for(int x = 0; x < feed.size(); x++) {
+          String tester = "id=\"" + content_id + "\"";
+          System.out.println(tester);
+          if (feed.get(x).contains(tester)) {
+            System.out.println("ContentServer " + content_id + " already has a feed. Replacing it.");
+            feed.set(x,xml_string);
+            not_new = true;
           }
         }
-      } else {
-        System.out.println("Error: Recieved empty XML. Sending 204");
-        out.println("204 - No Content");
-      }
+        //If a feed is from a new content server add it
+        if(not_new == false) {
+          if(feed.size() < 20) {
+            feed.add(xml_string);
+          } else {
+            feed.removeFirst();
+            feed.add(xml_string);;
+          }
+        }
 
+
+          lamport_timestamp++;
+          Packet response_packet = new Packet("200 - Success", lamport_timestamp);
+          outObj.writeObject(response_packet);
+
+          //Reads heartbeat until disconnect occurs
+          while (true) {
+            Thread.sleep(12000);
+            String new_input = in.readLine();
+            //If heartbeat does not occur find all associated feeds and delete
+            if (new_input == null) {
+              System.out.println("Content Server " + content_id + " Disconnected");
+              String tester = "id=\"" + content_id + "\"";
+
+              for(int x = 0; x < feed.size(); x++) {
+                if (feed.get(x).contains(tester)) {
+                  System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
+                  feed.remove(feed.get(x));
+                  x = x-1;
+                }
+              }
+              break;
+            }
+          }
+        } else {
+          System.out.println("Error: Recieved empty XML. Sending 204");
+          out.println("204 - No Content");
+        }
       }
       catch (Exception e) {
         e.printStackTrace();
@@ -196,7 +213,8 @@ public class AtomServer extends Thread {
 
         //Create an object stream to send the feed (or some other object in future)
         obj = new ObjectOutputStream(client_socket.getOutputStream());
-        obj.writeObject(feed);
+        GETPacket toSend = new GETPacket(feed,lamport_timestamp);
+        obj.writeObject(toSend);
 
         //Get input stream of ContentServer
         in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));

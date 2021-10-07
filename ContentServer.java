@@ -42,40 +42,48 @@ class ContentServer {
       //Read from AtomServer
       BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-
-      Scanner sc = new Scanner(System.in);
       String line = null;
+      //Get the length of the xml file to be sent
       int length = getLength(inputfile, id);
+
+      //PUT request header through socket
       System.out.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
-
       out_w.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
-      String server_response = in.readLine();
-      System.out.println(server_response);
+      String status_reply = in.readLine();
+      System.out.println(status_reply);
 
-      //XML Output to Server
-      buildThenSend(out_w, inputfile, id, socket);
+
+      //PUT request body through socket
+      lamport_timestamp++;
+      buildThenSend(inputfile, id, socket);
       ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
       Packet response_packet = (Packet) inObj.readObject();
 
+      //Process the response
       String response = response_packet.xml;
       int response_stamp = response_packet.timestamp;
       lamport_timestamp =  Math.max(response_stamp, lamport_timestamp) + 1;
       System.out.println(response);
       System.out.println("Current Timestamp: " + lamport_timestamp);
 
-      if(response.equals("200 - Success"))
+      //If response is successful proceed to send heartbeat
+      if(response.equals("200 - Success")) {
         while (true) {
           String new_input = null;
           new_input = input.nextLine();
-          Thread.sleep(12000);
-          if(new_input != null) {
+          if(new_input.equals("exit")) {
+            System.exit(1);
           } else {
             out_w.println("1");
+            Thread.sleep(12000);
           }
         }
+      } else if(response.equals("204 - No Content")) {
+        System.out.println("oops");
+      }
     }
     catch (IOException e) {
-      System.out.println("Broken or missing file.");
+      e.printStackTrace();
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -100,7 +108,7 @@ class ContentServer {
     }
   }
 
-  private static void buildThenSend(PrintWriter out_channel, String input, String id, Socket socket_channel) {
+  private static void buildThenSend(String input, String id, Socket socket_channel) {
     try {
     TransformerFactory tsf = TransformerFactory.newInstance();
     Transformer ts = tsf.newTransformer();
@@ -109,10 +117,7 @@ class ContentServer {
 
 
     ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
-    lamport_timestamp++;
     Packet packet = new Packet(toSend, lamport_timestamp);
-    // List<Packet> packetlist = new LinkedList<>();
-    // packetlist.add(packet);
     System.out.println("Sending: " + packet.xml);
     obj.writeObject(packet);
 
