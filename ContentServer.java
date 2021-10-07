@@ -17,11 +17,12 @@ class ContentServer {
   public static String id = null;
   public static String inputfile = null;
   public static int lamport_timestamp = 0;
+  public static int retry_count = 0;
+  public static String input = null;
+  public static String servername = null;
+  public static int port = 0;
 
   public static void main(String[] args) {
-
-    System.out.println("Initial timestamp: " + lamport_timestamp);
-
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
     id = input.nextLine();
@@ -29,10 +30,14 @@ class ContentServer {
     String str = input.nextLine();
     String cutName = str.replace("https://","");
     String[] split = cutName.split(":");
-    String servername = split[0];
+    servername = split[0];
+    port = Integer.parseInt(split[1]);
 
-    int port = Integer.parseInt(split[1]);
+    run(servername, port, input);
+  }
 
+  public static void run(String servername, int port, Scanner input) {
+    System.out.println("Initial timestamp: " + lamport_timestamp);
 
     try (Socket socket = new Socket(servername, port)) {
 
@@ -80,7 +85,16 @@ class ContentServer {
       }
     }
     catch (ConnectException e) {
-      System.out.println("Error: Server is offline");
+      System.out.println("Error: Server is offline. Retry in 12 seconds");
+      try {
+        Thread.sleep(12000);
+      } catch (InterruptedException ir) {
+        ir.printStackTrace();
+      }
+      System.out.println("Retrying ...");
+      retry_count++;
+      if(retry_count < 3)
+        run(servername, port, input);
     }
     catch (IOException e) {
       e.printStackTrace();
