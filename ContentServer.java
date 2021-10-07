@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
+import java.math.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -10,18 +11,26 @@ import org.w3c.dom.*;
 
 
 import xml.XMLCreator;
+import xml.Packet;
 
 class ContentServer {
-  public static int id = 001;
+  public static String id = null;
+  public static String inputfile = null;
+  public static int lamport_timestamp = 0;
 
   public static void main(String[] args) {
 
+    System.out.println("Initial timestamp: " + lamport_timestamp);
+
     //ContentServer input handling
     Scanner input = new Scanner(System.in);
+    id = input.nextLine();
+    inputfile = input.nextLine();
     String str = input.nextLine();
     String cutName = str.replace("https://","");
     String[] split = cutName.split(":");
     String servername = split[0];
+
     int port = Integer.parseInt(split[1]);
 
 
@@ -33,32 +42,91 @@ class ContentServer {
       //Read from AtomServer
       BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-
-      Scanner sc = new Scanner(System.in);
       String line = null;
+      //Get the length of the xml file to be sent
+      int length = getLength(inputfile, id);
 
-      out_w.println("PUT / HTTP/1.1");
-      System.out.println(in.readLine());
+      //PUT request header through socket
+      System.out.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
+      out_w.println("PUT /atom.xml HTTP/1.1\r\nUser-Agent: " + id + "\r\nContent Type: application/atom+xml\r\nContent Length: " + length);
 
-      //XML Output to Server
-      TransformerFactory tsf = TransformerFactory.newInstance();
-      Transformer ts = tsf.newTransformer();
-      XMLCreator creator = new XMLCreator();
-      String toSend = creator.build("input_file.txt","feed.xml",id);
+      //PUT request body through socket
+      lamport_timestamp++;
+      buildThenSend(inputfile, id, socket);
+      ObjectInputStream inObj = new ObjectInputStream(socket.getInputStream());
+      Packet response_packet = (Packet) inObj.readObject();
 
-      System.out.println("Sending: " + toSend);
-      out_w.println(toSend);
-      System.out.println(in.readLine());
+      //Process the response
+      String response = response_packet.xml;
+      int response_stamp = response_packet.timestamp;
+      lamport_timestamp =  Math.max(response_stamp, lamport_timestamp) + 1;
+      System.out.println(response);
+      System.out.println("Current Timestamp: " + lamport_timestamp);
 
-      while (true) {
-        Thread.sleep(12000);
-        out_w.println(1);
+      //If response is successful proceed to send heartbeat
+      if(response.equals("200 - Success") || response.equals("201 - HTTP Created")) {
+        while (true) {
+          String new_input = null;
+          new_input = input.nextLine();
+          if(new_input.equals("exit")) {
+            System.exit(1);
+          } else {
+            out_w.println("1");
+            Thread.sleep(12000);
+          }
+        }
+      } else if(response.equals("204 - No Content")) {
+        System.out.println("oops");
       }
+    }
+    catch (ConnectException e) {
+      System.out.println("Error: Server is offline");
+    }
+    catch (IOException e) {
+      e.printStackTrace();
     }
     catch (Exception e) {
       e.printStackTrace();
     }
   }
 
+  private static int getLength(String input, String id) {
+    int length = 0;
+    try {
+      TransformerFactory tsf = TransformerFactory.newInstance();
+      Transformer ts = tsf.newTransformer();
+      XMLCreator creator = new XMLCreator();
+      String toSend = creator.build(input,id);
 
+      length = toSend.length();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    finally {
+      return length;
+    }
+  }
+
+  private static void buildThenSend(String input, String id, Socket socket_channel) {
+    try {
+    TransformerFactory tsf = TransformerFactory.newInstance();
+    Transformer ts = tsf.newTransformer();
+    XMLCreator creator = new XMLCreator();
+    String toSend = creator.build(input,id);
+
+
+    ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
+    Packet packet = new Packet(toSend, lamport_timestamp);
+    System.out.println("Sending: " + packet.xml);
+    obj.writeObject(packet);
+
+    }
+    catch (DOMException e) {
+      System.out.println("Error: XML cannot build. Input source is empty or not formatted.");
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 }

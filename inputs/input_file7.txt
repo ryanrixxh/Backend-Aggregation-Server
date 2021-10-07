@@ -1,4 +1,4 @@
-title:My example feed
+title:My example feed 7
 subtitle:for demonstration purposes
 link:www.cs.adelaide.edu.au
 updated:2015-08-07T18:30:02Z
