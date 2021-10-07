@@ -54,8 +54,10 @@ public class AtomServer extends Thread {
           System.out.print(request);
           ClientHandler c_handler = new ClientHandler(socket);
           new Thread(c_handler).start();
+        } else {
+          AlternateHandler a_handler = new AlternateHandler(socket);
+          new Thread(a_handler).start();
         }
-
       }
     }
     catch (Exception e) {
@@ -86,8 +88,7 @@ public class AtomServer extends Thread {
       this.c_serverSocket = socket;
     }
 
-    public void run() throws NullPointerException {
-      PrintWriter out = null;
+    public void run()  {
       BufferedReader in = null;
       ObjectInputStream inObj = null;
       ObjectOutputStream outObj = null;
@@ -97,83 +98,81 @@ public class AtomServer extends Thread {
       try {
         System.out.println("Starting ContentHandler Thread ...");
 
-
-        out = new PrintWriter(c_serverSocket.getOutputStream(), true);
-
         //Get input stream of ContentServer
-        in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
         inObj = new ObjectInputStream(c_serverSocket.getInputStream());
-        outObj = new ObjectOutputStream(c_serverSocket.getOutputStream());
         packet = (Packet) inObj.readObject();
         lamport_timestamp = Math.max(packet.timestamp, lamport_timestamp) + 1;
         System.out.println("Current timestamp: " + lamport_timestamp);
         //Recieve XML Input from ContentServer
         String xml_string = packet.xml;
 
-        //Parse into XML to find ContentServer ID
-        XMLPrinter printer = new XMLPrinter();
-        Document doc = printer.parse_string(xml_string);
-        NodeList nList = doc.getElementsByTagName("feed");
-        Node node = nList.item(0);
-        Element e = (Element) node;
-        String content_id = e.getAttribute("id");
 
         if (xml_string != null) {
+          //Parse into XML to find ContentServer ID
+          XMLPrinter printer = new XMLPrinter();
+          Document doc = printer.parse_string(xml_string);
+          NodeList nList = doc.getElementsByTagName("feed");
+          Node node = nList.item(0);
+          Element e = (Element) node;
+          String content_id = e.getAttribute("id");
+
         //If a feed from this id is already here, replace it
-        boolean not_new = false;
-        for(int x = 0; x < feed.size(); x++) {
-          String tester = "id=\"" + content_id + "\"";
-          if (feed.get(x).contains(tester)) {
-            System.out.println("ContentServer " + content_id + " already has a feed. Replacing it.");
-            feed.set(x,xml_string);
-            not_new = true;
-          }
-        }
-        //If a feed is from a new content server add it
-        if(not_new == false) {
-          if(feed.size() < 20) {
-            feed.add(xml_string);
-            store_feed(feed,"ATOMFeed.txt");
-          } else {
-            feed.removeFirst();
-            feed.add(xml_string);
-            store_feed(feed,"ATOMFeed.txt");
-          }
-        }
-
-
-          lamport_timestamp++;
-          Packet response_packet = new Packet("200 - Success", lamport_timestamp);
-          if(not_new == false) {
-            response_packet.xml = "201 - HTTP Created";
-          }
-          outObj.writeObject(response_packet);
-
-          //Reads heartbeat until disconnect occurs
-          while (true) {
-            Thread.sleep(12000);
-            String new_input = in.readLine();
-            //If heartbeat does not occur find all associated feeds and delete
-            if (new_input == null) {
-              System.out.println("Content Server " + content_id + " Disconnected");
-              String tester = "id=\"" + content_id + "\"";
-
-              for(int x = 0; x < feed.size(); x++) {
-                if (feed.get(x).contains(tester)) {
-                  System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
-                  feed.remove(feed.get(x));
-                  store_feed(feed,"ATOMFeed.txt");
-                  x = x-1;
-                }
-              }
-              break;
+          boolean not_new = false;
+          for(int x = 0; x < feed.size(); x++) {
+            String tester = "id=\"" + content_id + "\"";
+            if (feed.get(x).contains(tester)) {
+              System.out.println("ContentServer " + content_id + " already has a feed. Replacing it.");
+              feed.set(x,xml_string);
+              not_new = true;
             }
           }
-        } else {
-          System.out.println("Error: Recieved empty XML. Sending 204");
-          lamport_timestamp++;
-          Packet response_packet = new Packet("204 - No Content", lamport_timestamp);
-          outObj.writeObject(response_packet);
+          //If a feed is from a new content server add it
+          if(not_new == false) {
+            if(feed.size() < 20) {
+              feed.add(xml_string);
+              store_feed(feed,"ATOMFeed.txt");
+            } else {
+              feed.removeFirst();
+              feed.add(xml_string);
+              store_feed(feed,"ATOMFeed.txt");
+            }
+          }
+
+            outObj = new ObjectOutputStream(c_serverSocket.getOutputStream());
+            lamport_timestamp++;
+            Packet response_packet = new Packet("200 - Success", lamport_timestamp);
+            if(not_new == false) {
+              response_packet.xml = "201 - HTTP Created";
+            }
+            outObj.writeObject(response_packet);
+
+            //Reads heartbeat until disconnect occurs
+            in = new BufferedReader(new InputStreamReader(c_serverSocket.getInputStream()));
+            while (true) {
+              Thread.sleep(12000);
+              String new_input = in.readLine();
+              //If heartbeat does not occur find all associated feeds and delete
+              if (new_input == null) {
+                System.out.println("Content Server " + content_id + " Disconnected");
+                String tester = "id=\"" + content_id + "\"";
+
+                for(int x = 0; x < feed.size(); x++) {
+                  if (feed.get(x).contains(tester)) {
+                    System.out.println("Feed " + x + " is from ContentServer " + content_id + ". Removing.");
+                    feed.remove(feed.get(x));
+                    store_feed(feed,"ATOMFeed.txt");
+                    x = x-1;
+                  }
+                }
+                break;
+              }
+            }
+          } else {
+            System.out.println("Error: Recieved empty XML. 204 Sent");
+            outObj = new ObjectOutputStream(c_serverSocket.getOutputStream());
+            lamport_timestamp++;
+            Packet response_packet = new Packet("204 - No Content", lamport_timestamp);
+            outObj.writeObject(response_packet);
         }
       }
       catch (Exception e) {
@@ -181,13 +180,7 @@ public class AtomServer extends Thread {
       }
       finally {
         try {
-          if (out != null) {
-            out.close();
-          }
-          if (in != null) {
-            in.close();
-            c_serverSocket.close();
-          }
+          c_serverSocket.close();
         }
         catch (IOException e) {
           e.printStackTrace();
@@ -215,9 +208,7 @@ public class AtomServer extends Thread {
         System.out.println("Starting Client Thread ...");
 
         inObj = new ObjectInputStream(client_socket.getInputStream());
-        System.out.println("Wheres it hanging?");
         Packet request = (Packet) inObj.readObject();
-        System.out.println("Wheres it hanging?");
         lamport_timestamp = Math.max(request.timestamp, lamport_timestamp) + 1;
 
         //Send a GETPacket with the xml data and lamport timestamp to the client\
@@ -242,6 +233,27 @@ public class AtomServer extends Thread {
         catch (IOException e) {
           e.printStackTrace();
         }
+      }
+    }
+  }
+
+  //If the server recieves a bad request send 400 back and do nothing else
+  private static class AlternateHandler implements Runnable {
+    private final Socket aSocket;
+
+    public AlternateHandler(Socket socket) {
+      this.aSocket = socket;
+    }
+
+    public void run()  {
+      try {
+        System.out.println("Bad Request. Sending 400.");
+        Packet response_packet = new Packet("400 - Bad Request", lamport_timestamp);
+        ObjectOutputStream outObj = new ObjectOutputStream(aSocket.getOutputStream());
+        outObj.writeObject(response_packet);
+      }
+      catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }

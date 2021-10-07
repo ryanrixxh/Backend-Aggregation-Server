@@ -65,23 +65,26 @@ class ContentServer {
       String response = response_packet.xml;
       int response_stamp = response_packet.timestamp;
       lamport_timestamp =  Math.max(response_stamp, lamport_timestamp) + 1;
-      System.out.println(response);
+      System.out.println("Server response: " + response);
       System.out.println("Current Timestamp: " + lamport_timestamp);
 
       //If response is successful proceed to send heartbeat
       if(response.equals("200 - Success") || response.equals("201 - HTTP Created")) {
+        String new_input = null;
         while (true) {
-          String new_input = null;
-          new_input = input.nextLine();
-          if(new_input.equals("exit")) {
-            System.exit(1);
-          } else {
-            out_w.println("1");
-            Thread.sleep(12000);
+          if (input.hasNextLine())
+            new_input = input.nextLine();
+          if (new_input != null) {
+            if(new_input.equals("exit")) {
+              break;
+            } else {
+              out_w.println("1");
+              Thread.sleep(3000);
+            }
           }
         }
       } else if(response.equals("204 - No Content")) {
-        System.out.println("oops");
+        System.out.println("Server did not store request");
       }
     }
     catch (ConnectException e) {
@@ -99,7 +102,10 @@ class ContentServer {
     catch (IOException e) {
       e.printStackTrace();
     }
-    catch (Exception e) {
+    catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
   }
@@ -107,12 +113,13 @@ class ContentServer {
   private static int getLength(String input, String id) {
     int length = 0;
     try {
-      TransformerFactory tsf = TransformerFactory.newInstance();
-      Transformer ts = tsf.newTransformer();
-      XMLCreator creator = new XMLCreator();
-      String toSend = creator.build(input,id);
+        TransformerFactory tsf = TransformerFactory.newInstance();
+        Transformer ts = tsf.newTransformer();
+        XMLCreator creator = new XMLCreator();
+        String toSend = creator.build(input,id);
 
-      length = toSend.length();
+        if(toSend != null)
+          length = toSend.length();
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -132,7 +139,6 @@ class ContentServer {
 
     ObjectOutputStream obj = new ObjectOutputStream(socket_channel.getOutputStream());
     Packet packet = new Packet(toSend, lamport_timestamp);
-    System.out.println("Sending: " + packet.xml);
     obj.writeObject(packet);
 
     }
