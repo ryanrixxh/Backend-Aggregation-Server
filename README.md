@@ -1,5 +1,5 @@
 # README
-# Distributed Systems Assignment 2
+# ATOM Feed Aggregation and Distribution in Java
 
 ## Design / Workflow
 **Aggregation Server**
